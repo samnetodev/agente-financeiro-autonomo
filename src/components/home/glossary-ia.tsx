@@ -5,7 +5,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
+  BookOpenText,
+  CaretDown,
   ChatCircleText,
+  CheckCircle,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr";
 import { Badge, SectionHeading } from "@/components/ui/primitives";
@@ -15,6 +18,21 @@ type Fonte = "base-conhecimento" | "ia" | "nao-verificado";
 interface ImpactoCliente {
   area: string;
   impacto: string;
+}
+
+interface ObjecaoConsultiva {
+  objecao: string;
+  resposta: string;
+}
+
+interface RoteiroConsultivo {
+  produto: string;
+  abertura: string;
+  beneficios: string[];
+  conexaoFuturo: string;
+  diagnostico: string[];
+  objecao: ObjecaoConsultiva;
+  transparencia: string;
 }
 
 interface GlossarioResponse {
@@ -27,6 +45,8 @@ interface GlossarioResponse {
   perguntasConsultivas: string[];
   relacionado: { label: string; href: string }[];
   fontes: { label: string; url: string }[];
+  roteiro?: RoteiroConsultivo;
+  paginaCompleta?: { label: string; href: string };
   iaTexto?: string;
   disclaimer: string;
 }
@@ -41,6 +61,7 @@ export function GlossaryIA({ suggestions }: { suggestions: string[] }) {
   const [input, setInput] = useState("");
   const [res, setRes] = useState<GlossarioResponse | null>(null);
   const [error, setError] = useState("");
+  const [aprofundado, setAprofundado] = useState(false);
   const [pending, startTransition] = useTransition();
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +79,7 @@ export function GlossaryIA({ suggestions }: { suggestions: string[] }) {
         const data = await r.json();
         if (!r.ok) throw new Error(data?.error ?? "Erro ao consultar.");
         setRes(data);
+        setAprofundado(false);
         setError("");
         requestAnimationFrame(() =>
           resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
@@ -163,14 +185,81 @@ export function GlossaryIA({ suggestions }: { suggestions: string[] }) {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
-                    Visão do profissional
-                  </h4>
-                  <p className="text-[14px] leading-relaxed text-foreground/80">
-                    {res.explicacaoTecnica}
-                  </p>
-                </div>
+                {res.roteiro ? (
+                  <div className="flex flex-col gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.04] p-5">
+                    <div className="flex items-center gap-2">
+                      <Sparkle size={14} weight="fill" className="text-emerald-400" />
+                      <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
+                        Roteiro consultivo · {res.roteiro.produto}
+                      </h4>
+                    </div>
+                    <p className="text-[12px] italic leading-relaxed text-foreground/55">
+                      {res.roteiro.abertura}
+                    </p>
+
+                    <div className="flex flex-col gap-1.5">
+                      <h5 className="font-mono-nums text-[10px] uppercase tracking-wider text-foreground/40">
+                        Benefícios que importam
+                      </h5>
+                      <ul className="flex flex-col gap-1.5">
+                        {res.roteiro.beneficios.map((b) => (
+                          <li
+                            key={b}
+                            className="flex items-start gap-2 text-[13px] leading-relaxed text-foreground/80"
+                          >
+                            <CheckCircle
+                              size={15}
+                              weight="fill"
+                              className="mt-0.5 shrink-0 text-emerald-400"
+                            />
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="rounded-xl border hairline bg-background p-3.5">
+                      <h5 className="mb-1 font-mono-nums text-[10px] uppercase tracking-wider text-emerald-400">
+                        Futuro da família e longo prazo
+                      </h5>
+                      <p className="text-[13px] leading-relaxed text-foreground/80">
+                        {res.roteiro.conexaoFuturo}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <h5 className="font-mono-nums text-[10px] uppercase tracking-wider text-foreground/40">
+                        Para o diagnóstico
+                      </h5>
+                      <ul className="flex flex-col gap-1.5">
+                        {res.roteiro.diagnostico.map((p, i) => (
+                          <li
+                            key={i}
+                            className="rounded-lg border hairline bg-background px-3 py-2 text-[13px] text-foreground/75"
+                          >
+                            “{p}”
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <h5 className="font-mono-nums text-[10px] uppercase tracking-wider text-foreground/40">
+                        Objeção comum e como responder
+                      </h5>
+                      <p className="text-[13px] text-foreground/75">
+                        <strong className="font-medium text-foreground/90">
+                          {res.roteiro.objecao.objecao}
+                        </strong>{" "}
+                        — {res.roteiro.objecao.resposta}
+                      </p>
+                    </div>
+
+                    <p className="font-mono-nums text-[10px] leading-relaxed text-foreground/35">
+                      {res.roteiro.transparencia}
+                    </p>
+                  </div>
+                ) : null}
 
                 <div className="flex flex-col gap-2">
                   <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
@@ -197,23 +286,62 @@ export function GlossaryIA({ suggestions }: { suggestions: string[] }) {
                   </div>
                 ) : null}
 
-                {res.perguntasConsultivas.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
-                      Como conversar com o cliente
-                    </h4>
-                    <ul className="flex flex-col gap-1.5">
-                      {res.perguntasConsultivas.map((p, i) => (
-                        <li
-                          key={i}
-                          className="rounded-lg border hairline bg-background px-3 py-2 text-[13px] text-foreground/75"
+                <div className="flex flex-col gap-3 border-t hairline pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setAprofundado((v) => !v)}
+                    className="inline-flex w-fit items-center gap-2 rounded-lg border hairline bg-background px-3.5 py-2 text-[13px] font-medium text-foreground/80 transition hover:border-emerald-500/40 hover:text-emerald-300"
+                  >
+                    <BookOpenText size={15} className="text-emerald-400" />
+                    {aprofundado ? "Recolher" : "Aprofundar no assunto"}
+                    <CaretDown
+                      size={14}
+                      className={`transition-transform ${aprofundado ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {aprofundado ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
+                          Visão do profissional
+                        </h4>
+                        <p className="text-[13px] leading-relaxed text-foreground/75">
+                          {res.explicacaoTecnica}
+                        </p>
+                      </div>
+
+                      {res.perguntasConsultivas.length > 0 ? (
+                        <div className="flex flex-col gap-2">
+                          <h4 className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-emerald-400">
+                            Como conversar com o cliente
+                          </h4>
+                          <ul className="flex flex-col gap-1.5">
+                            {res.perguntasConsultivas.map((p, i) => (
+                              <li
+                                key={i}
+                                className="rounded-lg border hairline bg-background px-3 py-2 text-[13px] text-foreground/75"
+                              >
+                                “{p}”
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {res.paginaCompleta ? (
+                        <Link
+                          href={res.paginaCompleta.href}
+                          className="inline-flex w-fit items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-[13px] font-medium text-emerald-300 transition hover:bg-emerald-500/15"
                         >
-                          “{p}”
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
+                          <BookOpenText size={15} />
+                          Página completa: {res.paginaCompleta.label}
+                          <ArrowUpRight size={13} />
+                        </Link>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </>
             )}
 

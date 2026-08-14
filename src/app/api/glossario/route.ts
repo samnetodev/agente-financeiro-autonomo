@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   if (kb.fonte === "nao-verificado") {
     const ai = await chatCompletion(
-      `Usuário perguntou sobre um produto financeiro ou termo de mercado: "${consulta}".\n\nVocê é o Agente Financeiro Autônomo. Gere um texto informativo em pt-BR com foco para o profissional do mercado financeiro (o bancário), com no máximo 220 palavras, estruturado como:\n- O que é (resumo simples)\n- Como funciona (características principais)\n- O que isso significa para o cliente\n- Uma pergunta consultiva para abrir a conversa\n\nRegras: conteúdo educacional; não invente números, fontes, leis ou notícias; não prometa rentabilidade; não faça recomendação personalizada de investimento.`
+      `Usuário perguntou sobre um produto financeiro ou termo de mercado: "${consulta}".\n\nVocê é o Agente Financeiro Autônomo. Gere um texto informativo em pt-BR com foco para o profissional do mercado financeiro (o bancário), com no máximo 220 palavras, estruturado como:\n- O que é (resumo simples)\n- Como funciona (características principais)\n- O que isso significa para o cliente\n- Benefícios em destaque (com transparência, sem promessa de rentabilidade)\n- Como conectar à proteção da família e ao planejamento de longo prazo, de forma transparente\n- Uma pergunta consultiva para abrir a conversa\n\nRegras: conteúdo educacional e orientação consultiva transparente; não invente números, fontes, leis ou notícias; não prometa rentabilidade; não faça recomendação personalizada de investimento.`
     );
     if (ai) {
       iaTexto = ai;

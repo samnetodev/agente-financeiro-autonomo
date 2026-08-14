@@ -51,6 +51,7 @@ export const sgsCodes = {
   dolarVenda: 10813,
   euro: 21619,
   ipeadiff: 10870,
+  inadimplenciaPf: 21082,
 } as const;
 
 export interface FetchedIndicator {

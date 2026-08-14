@@ -4,6 +4,7 @@ import { indicatorCatalog } from "@/lib/content/indicators";
 import { articlesA } from "@/lib/content/articles-a";
 import { articlesB } from "@/lib/content/articles-b";
 import { products } from "@/lib/content/products";
+import type { Product } from "@/lib/content/types";
 
 const articles = [...articlesA, ...articlesB];
 
@@ -20,6 +21,21 @@ export interface ImpactoCliente {
   impacto: string;
 }
 
+export interface ObjecaoConsultiva {
+  objecao: string;
+  resposta: string;
+}
+
+export interface RoteiroConsultivo {
+  produto: string;
+  abertura: string;
+  beneficios: string[];
+  conexaoFuturo: string;
+  diagnostico: string[];
+  objecao: ObjecaoConsultiva;
+  transparencia: string;
+}
+
 export interface ExplainResult {
   consulta: string;
   resumo30s: string;
@@ -30,6 +46,8 @@ export interface ExplainResult {
   relacionado: { label: string; href: string }[];
   fontes: { label: string; url: string }[];
   fonte: Fonte;
+  roteiro?: RoteiroConsultivo;
+  paginaCompleta?: { label: string; href: string };
   disclaimer: string;
 }
 
@@ -50,6 +68,62 @@ function normalize(s: string) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+const CONEXAO_FUTURO: Record<string, string> = {
+  previdencia:
+    "Conecte a conversa ao longo prazo: contribuição disciplinada para formar a renda da aposentadoria, com o benefício fiscal do PGBL e a possibilidade de transmitir o saldo aos beneficiários fora do inventário no VGBL.",
+  "seguro-de-vida":
+    "Conecte à proteção da família: o capital indenizado em caso de morte é isento de IR para os beneficiários e preserva a renda de quem depende do segurado, ajudando a manter o padrão de vida da família.",
+  "tesouro-direto":
+    "Conecte ao planejamento de longo prazo: títulos públicos indexados à inflação protegem o poder de compra no futuro, ideais para metas de médio e longo prazo, sem risco de crédito do emissor.",
+  cdb: "Conecte à construção do futuro: o CDB remunera acima da poupança com garantia do FGC, e a conversa deve alinhar prazo, liquidez e taxa ao objetivo do cliente, sem promessa de rentabilidade.",
+  lci: "Conecte à eficiência da carteira: a isenção de IR torna a LCI eficiente para objetivos de prazo maior, e a conversa deve equilibrar a menor liquidez com a meta do cliente.",
+  lca: "Conecte à eficiência da carteira: a isenção de IR torna a LCA eficiente, e a conversa deve equilibrar a carência e a liquidez com o objetivo do cliente.",
+  poupanca:
+    "Conecte à construção do futuro: a poupança é o ponto de partida da reserva, e a conversa deve mostrar, com base na regra oficial de remuneração, quando outra renda fixa com garantia e risco semelhantes rende mais para o objetivo de longo prazo.",
+  "fundos-de-investimento":
+    "Conecte à construção do futuro: a diversificação e a gestão profissional são o caminho de longo prazo, e a conversa deve ser transparente sobre taxas, come-cotas e condições de resgate.",
+  "conta-corrente":
+    "Conecte à organização do dia a dia: uma conta bem utilizada libera recursos para a reserva de emergência e para os objetivos de futuro, evitando tarifas desnecessárias.",
+  "cartao-de-credito":
+    "Conecte à saúde financeira: o crédito é ferramenta, não destino — a conversa equilibra o custo (CET), o teto do rotativo e a capacidade de pagamento para não comprometer o futuro da família.",
+  "credito-pessoal":
+    "Conecte à saúde financeira: o crédito deve caber no orçamento com folga, comparando sempre o CET, para resolver o momento sem comprometer o futuro da família.",
+  "financiamento-imobiliario":
+    "Conecte ao projeto de vida da família: o financiamento é o caminho da casa própria, e a conversa deve equilibrar a parcela, o CET e o comprometimento de renda ao longo de todo o prazo.",
+  consorcio:
+    "Conecte ao projeto de futuro da família: o consórcio é poupança disciplinada sem juros, e a conversa deve deixar claras as regras de contemplação e o custo da taxa de administração.",
+  cambio:
+    "Conecte ao planejamento: quem tem despesas ou objetivos em moeda estrangeira (viagens, educação, patrimônio) pode conversar sobre proteção cambial como parte de um plano, sem especulação.",
+};
+
+function buildRoteiro(product: Product): RoteiroConsultivo {
+  return {
+    produto: product.name,
+    abertura: `Roteiro de orientação do portal para uma conversa consultiva sobre ${product.name}. A informação é real e os benefícios são apresentados com transparência, sem promessa de rentabilidade.`,
+    beneficios: product.vantagens.slice(0, 3),
+    conexaoFuturo:
+      CONEXAO_FUTURO[product.slug] ??
+      "Conecte a conversa ao objetivo e ao prazo do cliente: o produto deve ser apresentado como parte de um plano financeiro consistente, que prioriza a reserva de emergência e constrói o futuro com previsibilidade.",
+    diagnostico: product.perguntasDiagnostico.slice(0, 2),
+    objecao: product.objecoes[0],
+    transparencia:
+      "Roteiro de orientação, não oferta. Apresente custos, riscos e condições com clareza — a decisão é sempre do cliente.",
+  };
+}
+
+function linkProduct(ref: { slug?: string; term?: string }) {
+  return products.find((p) => {
+    const np = normalize(p.name);
+    return (
+      (ref.slug != null && p.slug === ref.slug) ||
+      (ref.term != null &&
+        (np === normalize(ref.term) ||
+          np.includes(normalize(ref.term)) ||
+          normalize(ref.term).includes(np)))
+    );
+  });
+}
+
 function findKnowledge(consulta: string) {
   const q = normalize(consulta);
 
@@ -62,9 +136,12 @@ function findKnowledge(consulta: string) {
   );
 
   if (term) {
+    const product = linkProduct(term);
     return {
       resumo30s: term.definition,
       explicacaoTecnica: `${term.bancario} Em termos técnicos: ${term.tecnico}`,
+      roteiro: product ? buildRoteiro(product) : undefined,
+      paginaCompleta: { label: term.term, href: `/glossario/${term.slug}` },
       relacionado: term.related
         .map((slug) => {
           const t = glossaryTerms.find((x) => x.slug === slug);
@@ -88,6 +165,7 @@ function findKnowledge(consulta: string) {
     return {
       resumo30s: faq.answerShort,
       explicacaoTecnica: `${faq.answer} Exemplo: ${faq.example}`,
+      paginaCompleta: { label: faq.question, href: `/faq/${faq.slug}` },
       relacionado: faq.related
         .map((slug) => {
           const x = faqs.find((f) => f.slug === slug);
@@ -108,6 +186,10 @@ function findKnowledge(consulta: string) {
     return {
       resumo30s: `${indicator.name}: ${indicator.clientMeaning}`,
       explicacaoTecnica: `Indicador acompanhado pelo portal na categoria ${indicator.category}. Fonte primária: ${indicator.source}.`,
+      paginaCompleta: {
+        label: indicator.name,
+        href: `/indicadores/${indicator.slug}`,
+      },
       relacionado: [
         { label: "Radar do Mercado", href: "/radar" },
         ...glossaryTerms
@@ -128,6 +210,8 @@ function findKnowledge(consulta: string) {
     return {
       resumo30s: `${product.concept} ${product.funcionamento}`,
       explicacaoTecnica: `Liquidez: ${product.liquidez}. Tributação: ${product.tributacao}. Riscos: ${product.riscos.join(", ")}.`,
+      roteiro: buildRoteiro(product),
+      paginaCompleta: { label: product.name, href: `/produtos/${product.slug}` },
       relacionado: product.sources.map((s) => ({
         label: s.label,
         href: s.url,
@@ -145,6 +229,7 @@ function findKnowledge(consulta: string) {
     return {
       resumo30s: article.levels.t30,
       explicacaoTecnica: `${article.levels.bancario} ${article.levels.tecnico}`,
+      paginaCompleta: { label: article.title, href: `/guias/${article.slug}` },
       relacionado: article.related
         .map((slug) => {
           const x = articles.find((a) => a.slug === slug);

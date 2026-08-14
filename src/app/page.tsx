@@ -16,6 +16,7 @@ import { Ticker } from "@/components/market/ticker";
 import { Briefing } from "@/components/home/briefing";
 import { Newsletter } from "@/components/home/newsletter";
 import { GlossaryIA } from "@/components/home/glossary-ia";
+import { ConversaPanel } from "@/components/home/conversa-panel";
 import { IndicatorToConversation } from "@/components/home/indicator-chain";
 import { SectionHeading, Badge } from "@/components/ui/primitives";
 import {
@@ -129,56 +130,21 @@ export default async function HomePage() {
                 Explorar conteúdos
               </Link>
             </div>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono-nums text-[11px] uppercase tracking-wider text-foreground/40">
-              <span className="flex items-center gap-1.5">
-                <Compass size={13} className="text-emerald-400" /> Indicadores oficiais
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Lightning size={13} className="text-emerald-400" /> Explicações por IA
-              </span>
-              <span className="flex items-center gap-1.5">
-                <ChartLineUp size={13} className="text-emerald-400" /> Venda consultiva
-              </span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono-nums text-[11px] uppercase tracking-wider">
+              <Link href="/indicadores" className="flex items-center gap-1.5 text-foreground/50 transition hover:text-emerald-300">
+                <Compass size={13} className="text-emerald-400" /> {indicatorCatalog.length} indicadores oficiais
+              </Link>
+              <Link href="/explique" className="flex items-center gap-1.5 text-foreground/50 transition hover:text-emerald-300">
+                <Lightning size={13} className="text-emerald-400" /> IA em {tools.filter((t) => ["/explique", "/tradutor", "/chat"].includes(t.href)).length} ferramentas
+              </Link>
+              <Link href="/produtos" className="flex items-center gap-1.5 text-foreground/50 transition hover:text-emerald-300">
+                <ChartLineUp size={13} className="text-emerald-400" /> {products.length} produtos consultivos
+              </Link>
             </div>
           </div>
 
           <div className="hidden lg:block">
-            <div className="rounded-2xl border hairline bg-surface/70 p-5 backdrop-blur">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="font-mono-nums text-[11px] uppercase tracking-[0.18em] text-foreground/45">
-                  Do indicador à conversa
-                </span>
-                <span className="flex items-center gap-1.5 font-mono-nums text-[10px] text-emerald-400">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                  SELIC ↑
-                </span>
-              </div>
-              <div className="flex flex-col divide-y hairline">
-                {[
-                  "Impacto econômico",
-                  "Impacto nos produtos",
-                  "Impacto no cliente",
-                  "Perguntas para diagnóstico",
-                  "Possíveis oportunidades",
-                  "Fontes oficiais",
-                ].map((s, i) => (
-                  <div
-                    key={s}
-                    className="flex items-center gap-3 py-2.5 text-[13px] text-foreground/75"
-                  >
-                    <span className="font-mono-nums text-[10px] text-emerald-500">
-                      0{i + 1}
-                    </span>
-                    {s}
-                    {i === 3 ? (
-                      <span className="ml-auto text-[11px] text-foreground/40">
-                        “Como está sua reserva de emergência?”
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ConversaPanel indicator={indicators.find((i) => i.slug === "selic")!} />
           </div>
         </div>
       </section>

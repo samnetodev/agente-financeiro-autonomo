@@ -63,6 +63,9 @@ export async function buildRadar(): Promise<Indicator[]> {
     mapFromSgs({ ...indicatorCatalog.find((i) => i.slug === "euro")! }, sgsCodes.euro, (v) =>
       v.toFixed(4).replace(".", ",")
     ),
+    mapFromSgs({ ...indicatorCatalog.find((i) => i.slug === "inadimplencia")! }, sgsCodes.inadimplenciaPf, (v) =>
+      v.toFixed(2).replace(".", ",")
+    ),
   ]);
 
   const radar = indicatorCatalog.map((ind) => {
