@@ -80,6 +80,7 @@ curl -X POST http://localhost:3000/api/tradutor -H "Content-Type: application/js
 - **Não usar `url` no `schema.prisma`** — Prisma 7 exige o driver adapter e a configuração fica em `prisma.config.ts`.
 - **`next/font/google` não carrega dados nesta instalação** (sem rede); o layout usa stack de fontes do sistema via variáveis `--font-geist-sans`/`--font-geist-mono`.
 - **Ícones**: importar de `@phosphor-icons/react/dist/ssr` (o barrel normal usa `createContext` em módulo e quebra em Server Components no Next 16).
+- **API SGS do BCB**: `dados/ultimos/{n}` aceita no máximo `n=20` (acima disso retorna HTTP 400) e devolve `valor` como *string* — o radar usa 20 pontos e converte para número.
 - **zod 4**: use `z.email()` (o `z.string().email()` rejeita e-mails curtos).
 
 ## Aviso

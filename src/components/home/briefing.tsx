@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Indicator } from "@/lib/content/types";
 import { indicatorCatalog } from "@/lib/content/indicators";
 import { agenda } from "@/lib/content/agenda";
 import { opportunities } from "@/lib/content/opportunities";
@@ -9,16 +10,16 @@ function fmt(v: string) {
   return v || "—";
 }
 
-export function Briefing() {
+export function Briefing({ indicators = indicatorCatalog }: { indicators?: Indicator[] }) {
   const today = new Date().toISOString().slice(0, 10);
   const next = agenda
     .filter((e) => e.date >= today)
     .slice(0, 4);
   const upcoming = agenda.filter((e) => e.date >= today).length;
-  const selic = indicatorCatalog.find((i) => i.slug === "selic");
-  const ipca = indicatorCatalog.find((i) => i.slug === "ipca");
-  const dolar = indicatorCatalog.find((i) => i.slug === "dolar");
-  const prefixado = indicatorCatalog.find((i) => i.slug === "tesouro-prefixado");
+  const selic = indicators.find((i) => i.slug === "selic");
+  const ipca = indicators.find((i) => i.slug === "ipca");
+  const dolar = indicators.find((i) => i.slug === "dolar");
+  const prefixado = indicators.find((i) => i.slug === "tesouro-prefixado");
 
   const ops = opportunities.slice(0, 3);
 

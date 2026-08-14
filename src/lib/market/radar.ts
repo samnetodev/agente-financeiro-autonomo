@@ -7,7 +7,7 @@ async function mapFromSgs(
   code: number,
   labelValue: (v: number) => string
 ): Promise<Indicator> {
-  const series = await getSgsSeries(code, 30);
+  const series = await getSgsSeries(code, 20);
   if (series.length === 0) return indicator;
   const last = series[series.length - 1];
   const prev = series[series.length - 2];

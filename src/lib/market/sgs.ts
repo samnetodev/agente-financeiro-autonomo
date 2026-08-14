@@ -23,8 +23,10 @@ export async function getSgsSeries(
 ): Promise<SgsSeriesPoint[]> {
   try {
     const url = `${BASE}.${code}/dados/ultimos/${ultimos}?formato=json`;
-    const data = (await fetchJson(url)) as SgsSeriesPoint[];
-    return Array.isArray(data) ? data : [];
+    const data = (await fetchJson(url)) as { data: string; valor: number | string }[];
+    return Array.isArray(data)
+      ? data.map((p) => ({ data: p.data, valor: Number(p.valor) }))
+      : [];
   } catch {
     return [];
   }

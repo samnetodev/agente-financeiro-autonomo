@@ -10,10 +10,12 @@ import { faqs } from "@/lib/content/faqs";
 import { products } from "@/lib/content/products";
 import { sources } from "@/lib/content/sources";
 import { JsonLd, websiteSchema, organizationSchema } from "@/lib/seo/json-ld";
+import { buildRadar } from "@/lib/market/radar";
 import { RadarPanel } from "@/components/radar/radar-panel";
 import { Ticker } from "@/components/market/ticker";
 import { Briefing } from "@/components/home/briefing";
 import { Newsletter } from "@/components/home/newsletter";
+import { GlossaryIA } from "@/components/home/glossary-ia";
 import { IndicatorToConversation } from "@/components/home/indicator-chain";
 import { SectionHeading, Badge } from "@/components/ui/primitives";
 import {
@@ -40,10 +42,23 @@ export const metadata: Metadata = {
     "Um agente de IA que vigia o mercado, explica o que importa e traduz cada indicador em conversa consultiva. Fontes oficiais em tudo.",
 };
 
+export const dynamic = "force-dynamic";
+
 const selic = indicatorCatalog.find((i) => i.slug === "selic")!;
 const nextAgenda = agenda
   .filter((e) => e.date >= new Date().toISOString().slice(0, 10))
   .slice(0, 3);
+
+const glossarioSugestoes = [
+  "O que é CDB?",
+  "O que é LCI?",
+  "O que é LCA?",
+  "O que é Tesouro Direto?",
+  "O que é a poupança?",
+  "O que é previdência privada?",
+  "O que é CET?",
+  "O que é FGC?",
+];
 
 const tools = [
   {
@@ -72,12 +87,14 @@ const tools = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const indicators = await buildRadar();
+
   return (
     <>
       <JsonLd data={websiteSchema()} />
       <JsonLd data={organizationSchema()} />
-      <Ticker indicators={indicatorCatalog} />
+      <Ticker indicators={indicators} />
 
       {/* HERO */}
       <section className="relative overflow-hidden border-b hairline">
@@ -168,7 +185,7 @@ export default function HomePage() {
 
       {/* BRIEFING */}
       <section className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6">
-        <Briefing />
+        <Briefing indicators={indicators} />
       </section>
 
       {/* RADAR */}
@@ -187,7 +204,7 @@ export default function HomePage() {
               Radar completo <ArrowRight size={14} />
             </Link>
           </div>
-          <RadarPanel indicators={indicatorCatalog} />
+          <RadarPanel indicators={indicators} />
         </div>
       </section>
 
@@ -466,6 +483,13 @@ export default function HomePage() {
       {/* NEWSLETTER */}
       <section className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6">
         <Newsletter />
+      </section>
+
+      {/* GLOSSÁRIO POR IA */}
+      <section className="border-t hairline bg-background">
+        <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6">
+          <GlossaryIA suggestions={glossarioSugestoes} />
+        </div>
       </section>
 
       {/* FONTES */}
