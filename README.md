@@ -55,6 +55,16 @@ Não é mais um site de notícias. É um **copiloto de venda consultiva**.
 
 ---
 
+## 🚀 Quer testar agora?
+
+[![Deploy para o Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/samnetodev/agente-financeiro-autonomo)
+
+Um clique, entre com o GitHub, e o Render lê o `render.yaml` do repositório — build, banco e health check configurados. Em minutos o portal está no ar com o radar ao vivo da API do Banco Central.
+
+> **No plano grátis do Render**, o serviço dorme após ~15 min sem acesso e acorda na primeira visita (30–60s). O SQLite é efêmero: dados ao vivo e o portal funcionam normalmente; apenas mensagens do chat não persistem entre *redeploys*.
+
+---
+
 ## O que tem por trás (a honestidade que o projeto pede)
 
 Este é um **projeto teste**, construído **com a intermediação de IA — o [opencode](https://opencode.ai)**, a partir de uma instrução clara: *"sane uma dor do dia a dia de operadores do mercado financeiro, unificando e centralizando as informações pertinentes à rotina de trabalho"*.
